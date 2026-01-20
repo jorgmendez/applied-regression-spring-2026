@@ -1,0 +1,80 @@
+---
+title: "Lab1"
+author: "Jorge Mendez"
+date: "2026-01-18"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Problems
+
+## Problem 1:  Check Normality Dsitribution of data (QQ PLOT)
+
+```{r}
+sample <- c(26.4,23.5,25.4,22.9,25.2,39.2,25.5,31.9,26.0,44.6,35.5,38.6,
+30.1,31.0,30.8,32.8,47.7,39.1,55.3,50.7,73.8,71.1,68.4,77.1,
+19.4,19.3,18.7,19.0,23.2,21.3,23.2,19.9,18.9,19.8,19.6,21.9)
+
+```
+
+```{r}
+
+hist(sample)
+```
+
+```{r}
+sample.s <- sort(sample)  #sort data increasing
+sample.s
+```
+
+```{r}
+rank <- rank(sample.s) #rank data  from 1 to 36
+rank
+```
+```{r}
+size <- length(sample.s)   # tells me the size of the data
+size
+```
+
+```{r}
+p <- (rank-.5)/size
+p
+```
+```{r}
+z.quantile <- qnorm(p)     #Standard Normal Quantiles with such Probability
+z.quantile 
+```
+```{r}
+plot(x= z.quantile, y=sample.s, pch=16, main= 'QQ Plot')     #scatterplot of x=Z quantiles, y - data sorted
+abline(lm(sample.s ~ z.quantile))
+```
+Question: Observe the patter of the points.
+
+**Observation** : If the data were normal, deviations from the line would be small and random; here they are large, especially in the tails, indicating that the data is not approximately normal. 
+
+
+```{r}
+qqnorm(sample.s)
+qqline(sample.s)
+```
+
+
+## Problem 2
+
+```{r}
+sample <- c
+```
+
+
+
+
+
+
+
+
+
+
+
