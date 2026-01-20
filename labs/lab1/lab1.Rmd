@@ -13,14 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Problem 1:  Check Normality Dsitribution of data (QQ PLOT)
 
-```{r}
+```{r, echo=FALSE}
 sample <- c(26.4,23.5,25.4,22.9,25.2,39.2,25.5,31.9,26.0,44.6,35.5,38.6,
 30.1,31.0,30.8,32.8,47.7,39.1,55.3,50.7,73.8,71.1,68.4,77.1,
 19.4,19.3,18.7,19.0,23.2,21.3,23.2,19.9,18.9,19.8,19.6,21.9)
 
 ```
 
-```{r}
+```{r, echo=FALSE}
 
 hist(sample)
 ```
@@ -47,16 +47,20 @@ p
 z.quantile <- qnorm(p)     #Standard Normal Quantiles with such Probability
 z.quantile 
 ```
-```{r}
+#### QQ PLOT
+
+```{r, echo=FALSE}
 plot(x= z.quantile, y=sample.s, pch=16, main= 'QQ Plot')     #scatterplot of x=Z quantiles, y - data sorted
 abline(lm(sample.s ~ z.quantile))
 ```
+
+
 Question: Observe the patter of the points.
 
 **Observation** : If the data were normal, deviations from the line would be small and random; here they are large, especially in the tails, indicating that the data is not approximately normal. 
 
 
-```{r}
+```{r, echo=FALSE}
 qqnorm(sample.s)
 qqline(sample.s)
 ```
@@ -64,17 +68,115 @@ qqline(sample.s)
 
 ## Problem 2
 
-```{r}
-sample <- c
+```{r, echo=FALSE}
+sample <-c(26.4,23.5,25.4,22.9,25.2,39.2,25.5,31.9,26.0,44.6,35.5,38.6,
+30.1,31.0,30.8,32.8,47.7,39.1,55.3,50.7,73.8,71.1,68.4,77.1,
+19.4,19.3,18.7,19.0,23.2,21.3,23.2,19.9,18.9,19.8,19.6,21.9)
 ```
 
 
 
+```{r, echo=FALSE}
+n <- length(sample)
+xbar <- mean(sample)
+s <- sd(sample)
+
+n
+xbar
+s
+```
+a) Write a 95% CI for the population mean.
+
+```{r, echo=FALSE}
+alpha <- 0.05
+tcrit <- qt(1 - alpha/2, df = n - 1)
+
+ci_mean <- c(
+  xbar - tcrit * s / sqrt(n),
+  xbar + tcrit * s / sqrt(n)
+)
+
+ci_mean
+
+```
+**Interpretation:** We are 95% confident that the true population mean𝜇lies within this interval.
+
+
+b) Write a 95% CI for the population variance
+
+```{r, echo=FALSE}
+chisq_lower <- qchisq(alpha/2, df = n - 1)
+chisq_upper <- qchisq(1 - alpha/2, df = n - 1)
+
+ci_var <- c(
+  (n - 1) * s^2 / chisq_upper,
+  (n - 1) * s^2 / chisq_lower
+)
+
+ci_var
+
+```
+**Interpretation:** We are 95% confident that the true population variance lies between 187.8337 and 485.8378.
+
+
+c) Write a 95% CI fot the population standard deviation
+
+
+```{r, echo=FALSE}
+ci_sd <- sqrt(ci_var)
+ci_sd
+
+```
+**Assumption:** These confidence intervals are based on a random sample and (approximately) normal population assumptions; the variance and standard deviation intervals in particular rely on the normality assumption.
+
+
+## Problem 3
+
+```{r, echo=FALSE}
+
+set.seed(123)
+
+sample1 <- rnorm(50, mean=5, sd=2)
+sample2 <- rnorm(70, mean=10, sd=5)
+
+var.test(sample1, sample2)
+
+```
+
+- **H₀:** \(\sigma_1^2 = \sigma_2^2\)  
+- **H₁:** \(\sigma_1^2 \ne \sigma_2^2\)  
+- **Conclusion:** Based on the p-value, we **reject H₀** at \(\alpha = 0.05\).
 
 
 
+The F-test provides strong evidence against the null hypothesis of equal variances (p-value = 3.573e−09), indicating that the two population variances are not equal.
+
+
+**Assumption:** This test assumes that both populations are normally distributed and that the samples are independent.
 
 
 
+## Problem 4
 
+
+```{r, echo=FALSE}
+library(faraway)
+data(stat500)
+
+X <- stat500[, c("midterm", "final", "hw")]
+head(X)
+dim(X)
+```
+
+### Covariance matrix and correlation matrix
+
+```{r, echo=FALSE}
+cov_mat <- cov(X)
+cor_mat <- cor(X)
+
+cov_mat
+cor_mat
+round(cor_mat, 2)
+```
+**Interpretation:** The strongest linear relationship is between midterm and final scores (r = 0.55), while homework scores have weaker correlations with exam scores.
 
