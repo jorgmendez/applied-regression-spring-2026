@@ -6,8 +6,110 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+
 ```
+
+
+## Probelm 1
+
+
+We derive the following identities used in simple linear regression.
+
+\subsection*{(a) Derivation of $S_{XY}$}
+
+By definition,
+\[
+S_{XY} = \sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y}).
+\]
+
+Expand the product:
+\[
+(x_i - \bar{x})(y_i - \bar{y}) = x_i y_i - \bar{x}y_i - \bar{y}x_i + \bar{x}\bar{y}.
+\]
+
+Summing over $i$ gives
+\[
+S_{XY} = \sum x_i y_i - \bar{x}\sum y_i - \bar{y}\sum x_i + \sum \bar{x}\bar{y}.
+\]
+
+Since $\bar{x}$ and $\bar{y}$ are constants,
+\[
+\sum \bar{x}\bar{y} = n\bar{x}\bar{y},
+\quad
+\sum x_i = n\bar{x},
+\quad
+\sum y_i = n\bar{y}.
+\]
+
+Substituting,
+\[
+S_{XY} = \sum x_i y_i - n\bar{x}\bar{y}.
+\]
+
+Using
+\[
+\bar{x} = \frac{\sum x_i}{n},
+\quad
+\bar{y} = \frac{\sum y_i}{n},
+\]
+we obtain
+\[
+S_{XY} = \sum x_i y_i - \frac{(\sum x_i)(\sum y_i)}{n}.
+\]
+
+\subsection*{(b) Derivation of $S_{XX}$}
+
+By definition,
+\[
+S_{XX} = \sum_{i=1}^n (x_i - \bar{x})^2.
+\]
+
+Expand the square:
+\[
+(x_i - \bar{x})^2 = x_i^2 - 2\bar{x}x_i + \bar{x}^2.
+\]
+
+Summing over $i$,
+\[
+S_{XX} = \sum x_i^2 - 2\bar{x}\sum x_i + \sum \bar{x}^2.
+\]
+
+Since $\sum x_i = n\bar{x}$ and $\sum \bar{x}^2 = n\bar{x}^2$,
+\[
+S_{XX} = \sum x_i^2 - n\bar{x}^2.
+\]
+
+Using $\bar{x} = \frac{\sum x_i}{n}$,
+\[
+S_{XX} = \sum x_i^2 - \frac{(\sum x_i)^2}{n}.
+\]
+
+\subsection*{(c) Derivation of $S_{YY}$}
+
+Similarly,
+\[
+S_{YY} = \sum_{i=1}^n (y_i - \bar{y})^2.
+\]
+
+Expanding and summing,
+\[
+S_{YY} = \sum y_i^2 - 2\bar{y}\sum y_i + n\bar{y}^2.
+\]
+
+Since $\sum y_i = n\bar{y}$,
+\[
+S_{YY} = \sum y_i^2 - n\bar{y}^2.
+\]
+
+Using $\bar{y} = \frac{\sum y_i}{n}$,
+\[
+S_{YY} = \sum y_i^2 - \frac{(\sum y_i)^2}{n}.
+\]
 
 
 ```{r}
@@ -15,18 +117,18 @@ knitr::opts_chunk$set(echo = TRUE)
 library(faraway)
 
 data(stat500)
-head(stat500)
+
 
 ```
 
 ## Problem 2
-### (a) Correlation Matrix
+### (2a) Correlation Matrix
 
 ```{r}
 round(cor(stat500), 2)
 
 ```
-### (b)
+### (2b)
 
 ```{r}
 plot(total ~ final, data = stat500,
@@ -36,7 +138,8 @@ plot(total ~ final, data = stat500,
      main = "Scatter Plot of Total vs Final")
 
 ```
-### (c)
+
+### (2c)
 
 
 ```{r}
@@ -50,3 +153,197 @@ $\widehat{\text{total}} = 30.71 + 1.60(\text{final})$
 
 
 The slope estimate indicates that for each one-point increase in final exam score, the total score increases by approximately 1.60 points on average. The slope is statistically significant (t = 9.04, p-value = 2.53 × 10⁻¹²).
+
+
+### (2d) Residual analysis
+
+
+#### Residuals vs fitted values
+
+```{r}
+plot(model$fitted.values, resid(model),
+     pch = 16,
+     xlab = "Fitted Values",
+     ylab = "Residuals",
+     main = "Residuals vs Fitted Values")
+abline(h = 0, lty = 2)
+
+```
+
+
+#### Normal Q–Q plot
+
+```{r}
+qqnorm(resid(model))
+qqline(resid(model))
+
+```
+
+
+#### Cook’s distance (outliers / influence)
+
+```{r}
+plot(cooks.distance(model),
+     type = "h",
+     ylab = "Cook's Distance",
+     main = "Cook's Distance")
+abline(h = 4/length(resid(model)), col = "red", lty = 2)
+
+```
+The residuals versus fitted values plot shows no clear pattern, suggesting that the assumptions of linearity and constant variance are reasonable. The normal Q--Q plot indicates that the residuals are approximately normally distributed. Cook's distance does not reveal any highly influential observations.
+
+
+
+### (2e) Prediction with prediction intervals
+
+```{r}
+newdata <- data.frame(final = c(70, 80, 90))
+predict(model, newdata, interval = "prediction")
+
+```
+
+Using the fitted regression model, prediction intervals were constructed for total scores at selected final exam scores. For example, when the final exam score is 80, the predicted total score is 158.58, with a 95% prediction interval of (135.56, 181.59). This interval represents the range in which an individual student’s total score is expected to fall.
+
+## Problem 3
+
+
+```{r}
+table.b1 <- data.frame(
+  y  = c(10, 11, 11, 13, 10, 11, 10, 11, 4, 2, 7, 10, 9, 9, 6, 5, 5, 5, 6, 4, 3, 3, 4, 10, 6, 8, 2, 0),
+  x8 = c(2205, 2096, 1847, 1903, 1457, 1848, 1564, 1821, 2577, 2476, 1984, 1917,
+         1761, 1709, 1901, 2288, 2072, 2861, 2411, 2289, 2203, 2592, 2053, 1979,
+         2048, 1786, 2876, 2560)
+)
+
+```
+
+### (3a) Fit the simple linear regression
+
+```{r}
+model3 <- lm(y ~ x8, data = table.b1)
+summary(model3)
+
+```
+A simple linear regression model was fit relating the number of games won 
+
+\[
+\hat{y} = 21.79 - 0.00703\,x_8
+\]
+
+
+The slope is negative, indicating that as opponents’ rushing yards increase, the number of games won tends to decrease. The slope is statistically significant (t = −5.58, p-value = 7.38 × 10⁻⁶), suggesting that opponents’ rushing yards have a significant effect on games won.
+
+
+### (3b) ANOVA table and test for significance of regression
+
+```{r}
+anova(model3)
+
+```
+ *Hypotheses*
+ 
+ \[
+H_0:\beta_1 = 0 \quad \text{vs.} \quad H_a:\beta_1 \neq 0
+\]
+
+\[
+F = 31.10,\quad p\text{-value} = 7.38 \times 10^{-6}
+\]
+
+
+The ANOVA F-test gives 
+
+$F = 31.10$ with a p-value of $7.38 \times 10^{-6}$.
+
+Since the p-value is much smaller than 0.05, we reject the null hypothesis. There is strong evidence that opponents’ rushing yards are significantly related to the number of games won.
+ 
+ 
+### (3c) 95% confidence interval for the slope B1
+
+```{r}
+confint(model3, level = 0.95)
+
+```
+
+A 95\% confidence interval for the slope parameter $\beta_1$ (the coefficient of $x_8$) is
+\[
+(-0.00961,\,-0.00444).
+\]
+Equivalently,
+\[
+-0.00961 \le \beta_1 \le -0.00444.
+\]
+
+Since this interval does not contain $0$, we conclude that the slope is statistically different from zero at the $\alpha = 0.05$ level. Because the entire interval is negative, this indicates that larger values of opponents' rushing yards ($x_8$) are associated with fewer games won ($y$).
+
+
+### (3d) Percent of variability
+
+
+
+From the fitted regression model, the coefficient of determination is
+\[
+R^2 = 0.5447.
+\]
+Therefore, the percentage of variability in $y$ (games won) explained by the linear relationship with $x_8$ (opponents' rushing yards) is
+\[
+0.5447 \times 100\% = 54.47\%.
+\]
+Thus, approximately $54.47\%$ of the variability in games won is explained by opponents' rushing yards.
+
+
+
+### (3e) 95% confidence interval for the mean response
+
+```{r}
+newdata <- data.frame(x8 = 2000)
+predict(model3, newdata, interval = "confidence")
+
+```
+A 95\% confidence interval for the mean number of games won when opponents' rushing yards are $x_8 = 2000$ is $(6.77,\ 8.71)$. This interval represents plausible values for the average number of games won for teams whose opponents allow approximately 2000 rushing yards.
+
+
+## Problem 4
+
+```{r}
+hours <- c(159, 280, 101, 212,
+           224, 379, 179, 264,
+           222, 362, 168, 250,
+           149, 260, 485, 170)
+
+```
+
+### (4a) Hypotheses
+
+
+We wish to test whether the population mean repair time exceeds 225 hours. The hypotheses are
+\[
+H_0:\ \mu = 225
+\quad\text{vs.}\quad
+H_a:\ \mu > 225.
+\]
+
+
+```{r}
+t.test(hours, mu = 225, alternative = "greater")
+
+```
+
+### (4b)
+
+Using a one-sample $t$-test at the $\alpha = 0.05$ significance level, the test statistic is
+\[
+t = 0.669 \quad \text{with } df = 15.
+\]
+The p-value is $0.257$. Since $0.257 > 0.05$, we fail to reject $H_0$. Therefore, there is insufficient evidence to conclude that the mean repair time exceeds 225 hours.
+
+### (4c) 
+
+The p-value is $0.257$.
+
+### (4d) 
+A 95\% confidence interval for the population mean repair time is
+\[
+(198.23,\ \infty).
+\]
+
