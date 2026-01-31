@@ -1,0 +1,52 @@
+---
+title: "Lab 2"
+author: "Jorge Mendez"
+date: "2026-01-31"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#install.packages("faraway")   # run once if you don't have it
+library(faraway)
+
+data(stat500)
+head(stat500)
+
+```
+
+## Problem 2
+### (a) Correlation Matrix
+
+```{r}
+round(cor(stat500), 2)
+
+```
+### (b)
+
+```{r}
+plot(total ~ final, data = stat500,
+     pch = 16,
+     xlab = "Final Exam Score",
+     ylab = "Total Score",
+     main = "Scatter Plot of Total vs Final")
+
+```
+### (c)
+
+
+```{r}
+model <- lm(total ~ final, data = stat500)
+summary(model)
+
+```
+A simple linear regression model was fit with total score as the response variable and final exam score as the predictor. The estimated regression equation is
+
+$\widehat{\text{total}} = 30.71 + 1.60(\text{final})$
+
+
+The slope estimate indicates that for each one-point increase in final exam score, the total score increases by approximately 1.60 points on average. The slope is statistically significant (t = 9.04, p-value = 2.53 × 10⁻¹²).
