@@ -1,0 +1,236 @@
+---
+title: "Lab 3"
+author: "Jorge Mendez"
+date: "2026-02-07"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+
+```
+
+## Problem 1:  savings (faraway)
+
+### (1a) Build the Design Matrix $X$ and Compute $\hat{\boldsymbol{\beta}}$ from Scratch
+
+We consider the multiple linear regression model
+\[
+\mathbf{y} = X\boldsymbol{\beta} + \boldsymbol{\varepsilon},
+\qquad
+\boldsymbol{\varepsilon} \sim N(\mathbf{0}, \sigma^2 I).
+\]
+
+Here, $\mathbf{y}$ is the response vector, $X$ is the design (model) matrix containing a column of ones for the intercept and the predictor variables, $\boldsymbol{\beta}$ is the vector of regression coefficients, and $\boldsymbol{\varepsilon}$ is the random error vector.
+
+The ordinary least squares (OLS) estimator of $\boldsymbol{\beta}$ is given by
+\[
+\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T \mathbf{y}.
+\]
+
+This estimator minimizes the sum of squared residuals and provides the regression coefficient estimates for the multiple linear regression model.
+
+```{r}
+library(faraway)
+data(savings)
+
+# response
+y <- savings$sr
+
+# predictors (everything except sr)
+X_pred <- savings[, names(savings) != "sr"]
+
+# design matrix (add intercept column of 1s)
+X <- cbind(Intercept = 1, as.matrix(X_pred))
+
+# beta-hat from scratch
+beta_hat <- solve(t(X) %*% X) %*% (t(X) %*% y)
+
+# show first rows of X and the estimates
+head(X)
+beta_hat
+
+```
+From the output above, the design matrix $X$ consists of a column of ones corresponding to the intercept and the predictor variables $\text{pop15}$, $\text{pop75}$, $\text{dpi}$, and $\text{ddpi}$. Using the matrix formula
+\[
+\hat{\boldsymbol{\beta}} = (X^T X)^{-1} X^T \mathbf{y},
+\]
+we obtain the estimated regression coefficients
+\[
+\hat{\boldsymbol{\beta}} =
+(28.5661,\,-0.4612,\,-1.6915,\,-0.000337,\,0.4097)^T.
+\]
+These estimates represent the fitted effects of each predictor on the saving rate $sr$ and agree with the coefficients produced by the \texttt{lm()} function in \textsf{R}.
+
+
+### (1b) Fit the Multiple Linear Regression Model
+
+```{r}
+# Fit the multiple linear regression model
+model <- lm(sr ~ pop15 + pop75 + dpi + ddpi, data = savings)
+
+# Model summary
+summary(model)
+```
+
+The fitted multiple linear regression model is
+\[
+\widehat{sr}
+=
+28.57
+- 0.461\,\text{pop15}
+- 1.691\,\text{pop75}
+- 0.000337\,\text{dpi}
++ 0.410\,\text{ddpi}.
+\]
+
+Based on the coefficient $t$-tests, $\text{pop15}$ (p-value $0.0026$) and $\text{ddpi}$ (p-value $0.0425$) are statistically significant predictors of the saving rate at the $\alpha = 0.05$ level, while $\text{pop75}$ and $\text{dpi}$ are not. The overall regression is statistically significant with $F = 5.756$ and p-value $0.00079$. The coefficient of determination is $R^2 = 0.3385$, indicating that approximately $33.85\%$ of the variability in the saving rate is explained by the model.
+
+### (1c) ANOVA procedure: compute SST, SSR, SSE
+
+```{r}
+aov_tab <- anova(model)
+aov_tab
+
+```
+```{r}
+# degrees of freedom
+p  <- 4
+df2 <- 45
+
+# Sum of Squares from ANOVA table
+SSR <- 204.12 + 53.34 + 12.40 + 63.05
+SSE <- 650.71
+SST <- SSR + SSE
+
+# F-statistic
+F_stat <- (SSR/p) / (SSE/df2)
+
+# p-value
+p_value <- 1 - pf(F_stat, p, df2)
+
+c(SST = SST, SSR = SSR, SSE = SSE, F = F_stat, p_value = p_value)
+
+```
+From the ANOVA table, the regression sum of squares is
+\[
+SSR = 204.12 + 53.34 + 12.40 + 63.05 = 332.91,
+\]
+and the error sum of squares is
+\[
+SSE = 650.71.
+\]
+Thus, the total sum of squares is
+\[
+SST = SSR + SSE = 983.62.
+\]
+
+The ANOVA $F$-statistic is
+\[
+F
+=
+\frac{SSR/p}{SSE/(n-p-1)}
+=
+\frac{332.91/4}{650.71/45}
+=
+5.756,
+\]
+with degrees of freedom $(4,45)$ and p-value $0.00079$.
+
+Since the p-value is less than $0.05$, we reject the null hypothesis that all slope coefficients are zero. Therefore, the regression model is statistically significant.
+
+
+### (1c) Reduced model + partial F test
+
+```{r}
+# Reduced model
+model.red <- lm(sr ~ pop15 + ddpi, data = savings)
+
+summary(model.red)
+
+# Partial F-test: reduced vs full
+anova(model.red, model)
+
+
+```
+### (1d) Reduced Model and Partial $F$-Test
+
+From part (1b), the predictors $\text{pop75}$ and $\text{dpi}$ were not statistically significant at the $\alpha = 0.05$ level. We therefore consider a reduced model obtained by removing these variables.
+
+The reduced model is
+\[
+sr = \beta_0 + \beta_1\,\text{pop15} + \beta_2\,\text{ddpi} + \varepsilon,
+\qquad
+\varepsilon \sim N(0,\sigma^2).
+\]
+
+To compare the reduced model with the full model, a partial $F$-test was performed with hypotheses
+\[
+H_0:\ \beta_{\text{pop75}} = \beta_{\text{dpi}} = 0
+\quad \text{vs.} \quad
+H_a:\ \text{at least one of these coefficients is nonzero}.
+\]
+
+The partial $F$-test yields
+\[
+F = 1.72 \quad \text{with p-value } 0.19.
+\]
+
+Since the p-value exceeds $0.05$, we fail to reject $H_0$. Therefore, removing $\text{pop75}$ and $\text{dpi}$ does not significantly reduce the explanatory power of the model, and the reduced model is preferred for its simplicity.
+
+
+### (1e)  Perform 1 prediction
+
+```{r}
+# Choose one value for pop15 (example: 35)
+newdata <- data.frame(
+  pop15 = 35,
+  pop75 = mean(savings$pop75),
+  dpi   = mean(savings$dpi),
+  ddpi  = mean(savings$ddpi)
+)
+
+newdata
+
+
+
+```
+
+
+```{r}
+pred <- predict(model, newdata, se.fit = TRUE)
+pred
+
+```
+
+```{r}
+tcrit <- qt(0.975, df = pred$df)
+half_width <- tcrit * pred$se.fit
+
+CI <- c(
+  fit = pred$fit,
+  lwr = pred$fit - half_width,
+  upr = pred$fit + half_width
+)
+
+CI
+
+```
+Using the fitted multiple linear regression model, we predict the saving rate when
+$\text{pop15} = 35$ and the remaining predictors are held at their sample means.
+The estimated mean saving rate is
+\[
+\widehat{sr} = 9.71.
+\]
+
+A 95\% confidence interval for the mean saving rate is
+\[
+(8.63,\ 10.80).
+\]
+
+
+
