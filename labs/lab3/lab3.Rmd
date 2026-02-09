@@ -34,7 +34,7 @@ The ordinary least squares (OLS) estimator of $\boldsymbol{\beta}$ is given by
 
 This estimator minimizes the sum of squared residuals and provides the regression coefficient estimates for the multiple linear regression model.
 
-```{r}
+```{r, echo=FALSE}
 library(faraway)
 data(savings)
 
@@ -144,7 +144,7 @@ with degrees of freedom $(4,45)$ and p-value $0.00079$.
 Since the p-value is less than $0.05$, we reject the null hypothesis that all slope coefficients are zero. Therefore, the regression model is statistically significant.
 
 
-### (1c) Reduced model + partial F test
+### (1d) Reduced Model and Partial $F$-Test
 
 ```{r}
 # Reduced model
@@ -157,7 +157,7 @@ anova(model.red, model)
 
 
 ```
-### (1d) Reduced Model and Partial $F$-Test
+
 
 From part (1b), the predictors $\text{pop75}$ and $\text{dpi}$ were not statistically significant at the $\alpha = 0.05$ level. We therefore consider a reduced model obtained by removing these variables.
 
@@ -235,7 +235,7 @@ A 95\% confidence interval for the mean saving rate is
 
 ## Problem 2
 
-```{r}
+```{r, echo=FALSE}
 # NFL data: Table B.1 (1976 season)
 
 table.b1 <- data.frame(
@@ -333,5 +333,253 @@ At the $\alpha = 0.05$ level, all three predictors $x_2$, $x_7$, and $x_8$ are s
 
 
 
+### (2e) Reduced model + partial F-test
 
+```{r}
+model2.red <- lm(y ~ x2 + x8, data = table.b1)
+summary(model2.red)
+
+```
+```{r}
+anova(model2.red, model2)
+
+```
+To assess the contribution of $x_7$ (percentage of rushing plays), we compare the full model
+\[
+y = \beta_0 + \beta_2 x_2 + \beta_7 x_7 + \beta_8 x_8 + \varepsilon
+\]
+with the reduced model
+\[
+y = \beta_0 + \beta_2 x_2 + \beta_8 x_8 + \varepsilon.
+\]
+
+The hypotheses for the partial $F$-test are
+\[
+H_0:\ \beta_7 = 0
+\quad \text{vs.} \quad
+H_a:\ \beta_7 \neq 0.
+\]
+
+The partial $F$-test yields
+\[
+F = 4.83 \quad \text{with p-value } 0.0378.
+\]
+Since the p-value is less than $0.05$, we reject the null hypothesis. Therefore, $x_7$ provides a statistically significant contribution to the model and should be retained.
+
+## Problem 3
+
+We fit the multiple linear regression model
+\[
+y = \beta_0 + \beta_1 x_1 + \beta_6 x_6 + \varepsilon,
+\qquad
+\varepsilon \sim N(0,\sigma^2),
+\]
+where $y$ is gasoline mileage (miles per gallon), $x_1$ is engine displacement (cubic inches), and $x_6$ is the number of carburetor barrels.
+
+
+```{r, echo=FALSE}
+# Table B.3 (only variables needed for Problem 3.5a): y, x1, x6
+b3 <- data.frame(
+  y  = c(18.90,17.00,20.00,18.25,20.07,11.20,22.12,21.47,34.70,30.40,16.50,36.50,
+         21.50,19.70,20.30,17.80,14.39,14.89,17.80,16.41,23.54,21.47,16.59,31.90,
+         29.40,13.27,23.90,19.73,13.90,13.27,13.77,16.50),
+  x1 = c(350,350,250,351,225,440,231,262,89.7,96.9,350,85.3,
+         171,258,140,302,500,440,350,318,231,360,400,96.9,
+         140,460,133.6,318,351,351,360,350),
+  x6 = c(4,4,1,2,1,4,2,2,2,2,4,2,
+         2,1,2,2,4,4,4,2,2,2,4,2,
+         2,4,2,2,2,2,4,4)
+)
+
+head(b3)
+
+```
+
+### (3a) Fit the regression model
+
+```{r}
+model3 <- lm(y ~ x1 + x6, data = b3)
+summary(model3)
+
+```
+
+\[
+y = \beta_0 + \beta_1 x_1 + \beta_6 x_6 + \varepsilon,
+\qquad \varepsilon \sim N(0,\sigma^2).
+\]
+
+The fitted regression model is
+\[
+\widehat{y}
+=
+32.91
+- 0.0530\,x_1
++ 0.9295\,x_6.
+\]
+
+### (3a) ANOVA 
+
+```{r}
+anova(model3)
+
+```
+
+
+\subsection*{(b) Analysis of Variance and Significance of Regression}
+
+The analysis-of-variance (ANOVA) table for the fitted model yields an overall
+$F$-statistic of
+\[
+F = 53.31 \quad \text{with p-value } 1.93 \times 10^{-10}.
+\]
+Since the p-value is far smaller than $0.05$, we reject the null hypothesis that
+all slope coefficients are zero. Therefore, there is strong evidence that the
+regression model relating gasoline mileage to engine displacement and number of
+carburetor barrels is statistically significant.
+
+
+### (3c) Calculate $R^2$ and Adjusted $R^2$
+
+
+
+We compute the coefficient of determination $R^2$ and the adjusted coefficient of determination $R^2_{\text{Adj}}$ for the multiple linear regression model and compare them with those from the simple linear regression model relating gasoline mileage to engine displacement.
+
+
+```{r}
+summary(model3)$r.squared
+summary(model3)$adj.r.squared
+
+```
+For the multiple linear regression model including engine displacement $x_1$ and number of carburetor barrels $x_6$, the coefficient of determination is
+\[
+R^2 = 0.7862,
+\]
+and the adjusted coefficient of determination is
+\[
+R^2_{\text{Adj}} = 0.7714.
+\]
+This indicates that approximately $78.6\%$ of the variability in gasoline mileage is explained by the model.
+
+
+
+To compare these values with those from the simple linear regression model relating gasoline mileage to engine displacement only, we fit the model $y = \beta_0 + \beta_1 x_1 + \varepsilon$.
+
+
+```{r}
+model.simple <- lm(y ~ x1, data = b3)
+summary(model.simple)
+
+```
+
+For the multiple linear regression model relating gasoline mileage to engine displacement $x_1$ and the number of carburetor barrels $x_6$, the coefficient of determination is
+\[
+R^2 = 0.7862,
+\qquad
+R^2_{\text{Adj}} = 0.7714.
+\]
+
+For the simple linear regression model relating gasoline mileage only to engine displacement $x_1$, the corresponding values are
+\[
+R^2 = 0.7720,
+\qquad
+R^2_{\text{Adj}} = 0.7644.
+\]
+
+The multiple regression model has slightly larger values of both $R^2$ and $R^2_{\text{Adj}}$, indicating a modest improvement in explanatory power when $x_6$ is added. However, the increase is small, suggesting that engine displacement alone explains most of the variability in gasoline mileage.
+
+
+### (3d) Find a 95% COnfidence Interval for B1
+```{r}
+confint(model3, level = 0.95)
+
+```
+
+A 95\% confidence interval for the slope parameter $\beta_1$ is obtained using
+\[
+\hat{\beta}_1 \pm t_{0.975,\;n-p-1}\,SE(\hat{\beta}_1).
+\]
+
+From the model output, the 95\% confidence interval for $\beta_1$ is
+\[
+(-0.0656,\,-0.0405).
+\]
+
+Since this interval does not contain $0$, we conclude that $\beta_1$ is statistically different from zero at the 5\% significance level.
+
+### (3e) Compute the $t$-statistics for testing $H_0:\beta_1=0$ and $H_0:\beta_6=0$.
+
+```{r}
+summary(model3)
+
+```
+From the model output, the $t$-statistic for testing $H_0:\beta_1=0$ is
+\[
+t = -8.628 \quad \text{with p-value } 1.68\times 10^{-9}.
+\]
+Since the p-value is much smaller than $0.05$, we reject $H_0$ and conclude that engine displacement $x_1$ is a significant predictor of gasoline mileage.
+
+For testing $H_0:\beta_6=0$, the $t$-statistic is
+\[
+t = 1.387 \quad \text{with p-value } 0.176.
+\]
+Since the p-value exceeds $0.05$, we fail to reject $H_0$ and conclude that the number of carburetor barrels $x_6$ is not a significant predictor of gasoline mileage.
+
+
+### (3f) Find a 95\% confidence interval for the mean gasoline mileage when $x_1 = 275$ in.$^3$ and $x_6 = 2$ barrels.
+ 
+
+
+```{r}
+newdata <- data.frame(x1 = 275, x6 = 2)
+predict(model3, newdata, se.fit = TRUE)
+
+```
+```{r}
+yhat <- 20.18723
+se   <- 0.6448389
+df   <- 29
+
+tcrit <- qt(0.975, df)
+c(lower = yhat - tcrit*se,
+  upper = yhat + tcrit*se)
+
+```
+
+A 95\% confidence interval for the mean gasoline mileage when $x_1=275$ in.$^3$ and $x_6=2$ is
+\[
+(18.87,\ 21.51).
+\]
+
+
+### (3g) 95\% prediction interval for a new observation
+Find a 95\% prediction interval for a new observation of gasoline mileage when $x_1=257$ in.$^3$ and $x_6=2$ barrels.
+
+
+```{r}
+newdata <- data.frame(x1 = 257, x6 = 2)
+predict(model3, newdata, interval = "prediction", level = 0.95)
+
+```
+A 95\% prediction interval for a new observation of gasoline mileage when $x_1=257$ in.$^3$ and $x_6=2$ is
+\[
+(14.83,\ 27.45).
+\]
+
+
+
+### (3h) Breusch - Pagan test
+
+The null hypothesis is that the residuals have constant variance (homoscedasticity), and the alternative hypothesis is that the residuals have non-constant variance (heteroscedasticity).
+
+
+```{r}
+library(lmtest)
+bptest(model3)
+
+```
+The Breusch--Pagan test yields
+\[
+BP = 3.64 \quad \text{with p-value } 0.1617.
+\]
+Since the p-value is greater than $0.05$, we fail to reject the null hypothesis and conclude that there is no evidence of heteroscedasticity.
 
