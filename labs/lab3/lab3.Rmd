@@ -233,4 +233,105 @@ A 95\% confidence interval for the mean saving rate is
 \]
 
 
+## Problem 2
+
+```{r}
+# NFL data: Table B.1 (1976 season)
+
+table.b1 <- data.frame(
+  y  = c(10,11,11,13,10,11,10,11,4,2,7,10,9,9,6,5,5,5,6,4,3,3,4,10,6,8,2,0),
+  x2 = c(1985,2855,1737,2905,1666,2927,2341,2737,1414,1838,1480,2191,
+         2229,2204,2140,1730,2072,2929,2268,1983,1792,1606,1492,2835,
+         2416,1638,2649,1503),
+  x7 = c(59.7,55.0,65.6,61.4,66.1,61.0,66.1,58.0,57.0,58.9,67.5,57.2,
+         58.8,58.6,59.2,54.4,49.6,54.3,58.7,51.7,61.9,52.7,57.8,59.7,
+         54.9,65.3,43.8,53.5),
+  x8 = c(2205,2096,1847,1903,1457,1848,1564,1821,2577,2476,1984,1917,
+         1761,1709,1901,2288,2072,2861,2411,2289,2203,2592,2053,1979,
+         2048,1786,2876,2560)
+)
+
+head(table.b1)
+
+```
+
+### (2a) Fit the multiple linear regression model
+
+We fit a multiple linear regression model relating the number of games won ($y$) to the team's passing yardage ($x_2$), the percentage of rushing plays ($x_7$), and the opponents' rushing yards ($x_8$):
+\[
+y = \beta_0 + \beta_2 x_2 + \beta_7 x_7 + \beta_8 x_8 + \varepsilon,
+\qquad
+\varepsilon \sim N(0,\sigma^2).
+\]
+
+
+```{r}
+model2 <- lm(y ~ x2 + x7 + x8, data = table.b1)
+summary(model2)
+
+```
+A multiple linear regression model was fit relating the number of games won ($y$) to passing yardage ($x_2$), percentage of rushing plays ($x_7$), and opponents' rushing yards ($x_8$). The fitted regression equation is
+\[
+\hat{y}
+=
+-1.81
++ 0.00360\,x_2
++ 0.194\,x_7
+- 0.00482\,x_8.
+\]
+
+The estimated coefficient for passing yardage ($x_2$) is positive and statistically significant ($t = 5.18$, $p < 0.001$), indicating that teams with higher passing yardage tend to win more games. The coefficient for percent rushing plays ($x_7$) is also positive and significant ($t = 2.20$, $p = 0.038$), suggesting that a higher proportion of rushing plays is associated with more wins. The coefficient for opponents' rushing yards ($x_8$) is negative and significant ($t = -3.77$, $p < 0.001$), indicating that allowing more rushing yards is associated with fewer games won.
+
+
+The overall $F$-test yields
+\[
+F = 29.44 \quad \text{with p-value } 3.27 \times 10^{-8},
+\]
+providing strong evidence that at least one of the predictors is linearly related to the number of games won. The coefficient of determination is $R^2 = 0.7863$, indicating that approximately $78.63\%$ of the variability in games won is explained by the model.
+
+
+### (2b) ANOVA
+
+```{r}
+anova(model2)
+
+```
+
+The ANOVA table yields an overall $F$-statistic of
+\[
+F = 29.44 \quad \text{with p-value } 3.27 \times 10^{-8}.
+\]
+Since the p-value is much smaller than $0.05$, we reject the null hypothesis. Therefore, there is strong evidence that the regression model is significant and that at least one of the predictors is related to the number of games won.
+
+
+### (2c) t-tests for B1, B7, B8
+
+To test the contribution of each predictor, we test
+\[
+H_0:\ \beta_j = 0
+\quad \text{vs.} \quad
+H_a:\ \beta_j \neq 0,
+\]
+using the test statistic
+\[
+t = \frac{\hat{\beta}_j}{SE(\hat{\beta}_j)} \sim t_{n-p-1}.
+\]
+Here, $n=28$ and $p=3$, so the degrees of freedom are $n-p-1=24$.
+
+
+```{r}
+summary(model2)
+
+```
+From the fitted model output, the $t$-statistics are
+\[
+t_{x_2} = 5.177 \ (p = 2.66\times 10^{-5}),\quad
+t_{x_7} = 2.198 \ (p = 0.037815),\quad
+t_{x_8} = -3.771 \ (p = 0.000938).
+\]
+At the $\alpha = 0.05$ level, all three predictors $x_2$, $x_7$, and $x_8$ are statistically significant. Thus, passing yardage ($x_2$) and percent rushing plays ($x_7$) have significant positive associations with games won, while opponents' rushing yards ($x_8$) has a significant negative association with games won.
+
+
+
+
 
